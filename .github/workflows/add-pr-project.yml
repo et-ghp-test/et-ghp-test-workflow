@@ -24,7 +24,6 @@ jobs:
           private_key: ${{ secrets.ET_GHP_TEST_WORKFLOW_APP1_PRIVATE_KEY }}
       # Sets environment variables for this step.
       #
-      # Replace `YOUR_ORGANIZATION` with the name of your organization. For example, `octo-org`.
       - name: Get project data
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
