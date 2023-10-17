@@ -82,21 +82,21 @@ jobs:
                 value: {
                   singleSelectOptionId: $status_value
                   }
-                }) {
-                  projectV2Item {
-                    id
-                    }
-                }
-                set_date_posted: updateProjectV2ItemFieldValue(input: {
-                  projectId: $project
-                  itemId: $item
-                  fieldId: $date_field
-                  value: {
-                    date: $date_value
+              }) {
+                projectV2Item {
+                  id
                   }
-                }) {
-                  projectV2Item {
-                    id
-                  }
+              }
+              set_date_posted: updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $date_field
+                value: {
+                  date: $date_value
                 }
-              }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.TODO_OPTION_ID }} -f date_field=$DATE_FIELD_ID -f date_value=$DATE --silent
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.TODO_OPTION_ID }} -f date_field=$DATE_FIELD_ID -f date_value=$DATE --silent
