@@ -1,0 +1,76 @@
+name: Update Issue Security Fields
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  update_issue_security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app_id: ${{ secrets.ET_GHP_TEST_WORKFLOW_APP1_ID }}
+          private_key: ${{ secrets.ET_GHP_TEST_WORKFLOW_APP1_PRIVATE_KEY }}
+      - name: Get project data
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          ORGANIZATION: et-ghp-test
+          PROJECT_NUMBER: 3
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org)
+                projectV2(number: $number) {
+                  id
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
+          echo 'SECURITY_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Security") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'SECURITY_HIGH_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Security") | .options[] | select(.name=="High") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'SECURITY_FLAG_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Security flag") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'SECURITY_FLAG_YES_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Security flag") | .options[] | select(.name=="Yes") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'TODO_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Todo") |.id' project_data.json) >> $GITHUB_ENV
+      - name: Set fields
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $security_field: ID!
+              $security_value: String!
+            ) {
+              set_security_field: updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $security_field
+                value: {
+                  singleSelectOptionId: $security_value
+                  }
+              }) {
+                projectV2Item {
+                  id
+                  }
+              }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
