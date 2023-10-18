@@ -74,4 +74,4 @@ jobs:
                   id
                   }
               }
-            }' -f project=$PROJECT_ID -f item=${{ github.event.issue.node_id }} -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
+            }' -f project=$PROJECT_ID -f item="${{ github.event.issue.node_id }}" -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
