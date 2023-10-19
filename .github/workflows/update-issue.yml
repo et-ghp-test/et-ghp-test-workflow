@@ -54,18 +54,17 @@ jobs:
       - name: Set fields
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
-          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           gh api graphql -f query='
             mutation (
               $project: ID!
-              $item: ID!
+              $issue: ID!
               $security_field: ID!
               $security_value: String!
             ) {
               set_security_field: updateProjectV2ItemFieldValue(input: {
                 projectId: $project
-                itemId: $item
+                issueId: $issue
                 fieldId: $security_field
                 value: {
                   singleSelectOptionId: $security_value
@@ -75,4 +74,4 @@ jobs:
                   id
                   }
               }
-            }' -f project=$PROJECT_ID -f item=$ISSUE_ID -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
+            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
