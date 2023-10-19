@@ -54,6 +54,7 @@ jobs:
       - name: Set fields
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           gh api graphql -f query='
             mutation (
@@ -74,4 +75,4 @@ jobs:
                   id
                   }
               }
-            }' -f project=$PROJECT_ID -f item="${{ github.event.issue.node_id }}" -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
+            }' -f project=$PROJECT_ID -f item=$ISSUE_ID -f security_field=$SECURITY_FIELD_ID -f security_value=${{ env.SECURITY_HIGH_OPTION_ID }} --silent
