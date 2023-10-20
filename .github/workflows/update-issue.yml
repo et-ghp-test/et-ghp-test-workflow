@@ -1,8 +1,7 @@
 name: Update Issue Security Fields
 on:
   issues:
-    types:
-      - labeled
+    types: [labeled, edited]
 jobs:
   update_issue_security:
     runs-on: ubuntu-latest
